@@ -232,11 +232,6 @@ Hvis dine API-nøgler bliver eksponeret:
 
 ## 📞 Support
 
-Har du problemer eller spørgsmål?
-- 📧 Email: [din-email]
-- 🌐 Website: [dit-website]
-- 📱 GitHub Issues: [link til issues]
-
 ## ⚖️ Licens
 
 Dette projekt er licenseret under MIT License - se [LICENSE](LICENSE) filen for detaljer.
