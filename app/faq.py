@@ -23,7 +23,7 @@ FAQ_RESPONSES = {
     
     "services": {
         "keywords": ["ydelser", "services", "tilbyder", "kan i", "hjælpe med", "specialister", "kompetencer"],
-        "answer": "Vi tilbyder et komplet spektrum af IT-services: 24/7 IT-support, cloud-migration, applikationsstyring, cybersikkerhed, IT-infrastruktur optimering, administrerede services og strategisk IT-rådgivning. Vores team har over 10 års erfaring med virksomheds-IT i alle størrelser.",
+        "answer": "<strong>🔧 Vores IT-services</strong><br><br><strong>Support & Drift:</strong><br>• 24/7 IT-support og hotline<br>• Proaktiv systemovervågning<br>• Fejlfinding og problemløsning<br>• Helpdesk og bruger-support<br><br><strong>Cloud & Infrastruktur:</strong><br>• Cloud-migration til Azure/AWS<br>• Server-opsætning og vedligeholdelse<br>• Netværk og sikkerhedsløsninger<br>• Backup og disaster recovery<br><br><strong>Sikkerhed & Compliance:</strong><br>• Cybersikkerhed og firewall<br>• GDPR-compliance rådgivning<br>• Email-sikkerhed og spam-filter<br>• Sikkerhedsaudit og penetrationstest<br><br><strong>Rådgivning:</strong><br>• IT-strategi og digitaliseringsplaner<br>• System-integration og optimering<br>• Leverandør-evaluering og indkøb",
         "show_contact": True
     },
     
@@ -47,7 +47,7 @@ FAQ_RESPONSES = {
     
     "kunder_cases": {
         "keywords": ["kunder", "cases", "cases", "projekter", "erfaring", "tidligere", "eksempler", "reference", "success", "case studies", "hvem har i hjulpet", "danx", "chr hansen", "sentia", "hvad har i lavet", "lavet hos", "arbejdet med", "hjulpet med", "løst", "løsninger", "gjort", "portfolie"],
-        "answer": "Vi har hjulpet mange virksomheder med deres IT-udfordringer. Blandt vores kunder finder du DANX (digitalisering af buscertifikat-processen), Chr. Hansen (cloud-migration og IT-infrastruktur optimering), SENTIA (24/7 IT-support og cybersikkerhed) og mange andre. Vi har erfaring fra små startups til store koncerner og kan tilpasse vores løsninger til enhver virksomhed.",
+        "answer": "<strong>🏆 Vores kunder og projekter</strong><br><br><strong>DANX (Certificerings-digitalisering):</strong><br>• Digitaliseret buscertifikat-processen<br>• Automatiseret workflows og compliance<br>• <em>70% reduktion i sagsbehandlingstid</em><br><br><strong>Chr. Hansen (Cloud-migration):</strong><br>• Migreret produktionssystemer til Azure<br>• Optimeret netværksarkitektur<br>• <em>40% reduktion i IT-driftsomkostninger</em><br><br><strong>SENTIA (24/7 IT-support):</strong><br>• Kritisk hosting-miljø support<br>• Avancerede sikkerhedsløsninger<br>• <em>99.9% oppetid på systemer</em><br><br><strong>Andre projekter:</strong><br>• Små startups → Store koncerner<br>• Alle brancher og størrelser<br>• Skræddersyede løsninger",
         "show_contact": True
     },
     
@@ -72,6 +72,12 @@ FAQ_RESPONSES = {
     "arbejde_projekter": {
         "keywords": ["hvad laver i", "hvilke opgaver", "arbejde", "job", "aktiviteter", "hvad beskæftiger", "arbejder med", "fokus", "specialiserer", "gør i", "type arbejde"],
         "answer": "Vi specialiserer os i at levere komplet IT-support og -løsninger til danske virksomheder. Vores arbejde spænder fra daglig IT-support og fejlfinding til store digitaliserings- og cloud-migration projekter. Vi arbejder både med proaktiv IT-drift, cybersikkerhed, applikationsstyring og strategisk IT-rådgivning. Hver dag hjælper vi virksomheder med at optimere deres IT-miljøer og sikre stabil drift.",
+        "show_contact": True
+    },
+    
+    "virksomhed_om": {
+        "keywords": ["hvad handler", "hvad beskæftiger", "om virksomheden", "hvad er", "forretning", "firma", "company", "business", "hvad gør i", "jeres virksomhed"],
+        "answer": "<strong>🚀 Support Solutions - Jeres IT-partner</strong><br><br><strong>Hvad vi gør:</strong><br>• 24/7 IT-support og fejlløsning<br>• Cloud-migration og modernisering<br>• Cybersikkerhed og backup-løsninger<br>• Applikationsstyring og optimering<br>• Strategisk IT-rådgivning<br><br><strong>Vores ekspertise:</strong><br>• +10 års erfaring med virksomheds-IT<br>• Specialister i Microsoft Azure<br>• GDPR-compliance og sikkerhed<br>• Proaktiv overvågning og vedligeholdelse<br><br><strong>Hvem vi hjælper:</strong><br>• Små og mellemstore virksomheder<br>• Startups der skal skalere IT<br>• Etablerede firmaer der vil modernisere<br>• Virksomheder med kritiske IT-behov",
         "show_contact": True
     },
     
