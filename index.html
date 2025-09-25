@@ -166,26 +166,76 @@
             color: white;
         }
 
-        .contact-button {
+                .contact-button {
             display: inline-block;
-            margin: 20px 0 10px 0;
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #28a745, #20c997);
-            border-radius: 25px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
-            transition: all 0.3s ease;
+            border-radius: 25px;
             font-weight: 600;
-            font-size: 0.95em;
-            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
-            border: none;
-            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .contact-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
             color: white;
+        }
+
+        /* Smart Suggestions Styling */
+        .suggestions-container {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+            border: 2px solid #e3f2fd;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .suggestions-header {
+            text-align: center;
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .suggestion-btn {
+            background: white;
+            border: 2px solid #e3f2fd;
+            border-radius: 25px;
+            padding: 12px 18px;
+            color: #1976d2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .suggestion-btn:hover {
+            background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
         }
 
         .contact-button:before {
@@ -443,6 +493,13 @@
             const question = input.value.trim();
             
             if (!question) return;
+
+            // Mark that user has asked their first question
+            hasAskedFirstQuestion = true;
+
+            // Remove suggestions when question is asked
+            removeSuggestions();
+            resetInactivityTimer();
             
             addMessage(question, true);
             input.value = '';
@@ -479,6 +536,7 @@
         }
         
         function askExample(question) {
+            hasAskedFirstQuestion = true; // Mark first question as asked
             document.getElementById('questionInput').value = question;
             askQuestion();
         }
@@ -487,7 +545,87 @@
             if (event.key === 'Enter') {
                 askQuestion();
             }
+            // Reset inactivity timer when user types
+            resetInactivityTimer();
         }
+
+        // Inactivity suggestions system
+        let inactivityTimer;
+        let suggestionsShown = false;
+        let hasAskedFirstQuestion = false; // Track if user has asked at least one question
+
+        const smartSuggestions = [
+            "Hvilke services tilbyder I?",
+            "Hvad handler jeres virksomhed om?",
+            "Hvilke kunder har I hjulpet?",
+            "Kan vi booke et møde?",
+            "Hvad koster jeres services?",
+            "Hvor hurtigt svarer I på support?"
+        ];
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            suggestionsShown = false;
+            removeSuggestions();
+            
+            // Only start timer if user has asked at least one question
+            if (hasAskedFirstQuestion) {
+                inactivityTimer = setTimeout(() => {
+                    if (!suggestionsShown && !document.getElementById('questionInput').value.trim()) {
+                        showSmartSuggestions();
+                    }
+                }, 10000); // 10 sekunder
+            }
+        }
+
+        function showSmartSuggestions() {
+            if (suggestionsShown) return;
+            suggestionsShown = true;
+
+            const chatContainer = document.getElementById('chatContainer');
+            const suggestionsDiv = document.createElement('div');
+            suggestionsDiv.id = 'smartSuggestions';
+            suggestionsDiv.innerHTML = `
+                <div class="suggestions-container">
+                    <div class="suggestions-header">
+                        <span>💡 Måske kan jeg hjælpe med et af disse spørgsmål?</span>
+                    </div>
+                    <div class="suggestions-grid">
+                        ${smartSuggestions.map(suggestion => 
+                            `<button class="suggestion-btn" onclick="askExample('${suggestion}')">${suggestion}</button>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            chatContainer.appendChild(suggestionsDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeSuggestions() {
+            const existing = document.getElementById('smartSuggestions');
+            if (existing) {
+                existing.remove();
+            }
+        }
+
+        // Start inactivity timer only after first question
+        window.addEventListener('load', () => {
+            // Don't start timer immediately - wait for first question
+            
+            // Reset timer on input focus/typing (but only if first question was asked)
+            const input = document.getElementById('questionInput');
+            input.addEventListener('input', () => {
+                if (hasAskedFirstQuestion) {
+                    resetInactivityTimer();
+                }
+            });
+            input.addEventListener('focus', () => {
+                if (hasAskedFirstQuestion) {
+                    resetInactivityTimer();
+                }
+            });
+        });
         
         // Test connection på load
         window.addEventListener('load', async () => {
