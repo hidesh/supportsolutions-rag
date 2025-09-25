@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Solutions - RAG Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .chat-container {
+            height: 500px;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 18px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .bot-message {
+            background: white;
+            border: 2px solid #e3f2fd;
+            color: #333;
+        }
+
+        .sources {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+        }
+
+        .sources-dropdown {
+            cursor: pointer;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .sources-dropdown:hover {
+            background: #e3f2fd;
+        }
+
+        .sources-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .dropdown-arrow {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+            color: #666;
+        }
+
+        .dropdown-arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .sources-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0;
+        }
+
+        .sources-content.expanded {
+            max-height: 200px;
+            padding: 15px 0 5px 0;
+        }
+
+        .source-link {
+            display: inline-block;
+            margin: 8px 10px 8px 0;
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.85em;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .source-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .contact-button {
+            display: inline-block;
+            margin: 20px 0 10px 0;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95em;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+
+        .contact-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+            color: white;
+        }
+
+        .contact-button:before {
+            content: "📞 ";
+            margin-right: 5px;
+        }
+
+        .input-container {
+            padding: 30px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        #questionInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        #questionInput:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        #askButton {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #askButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        #askButton:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .welcome-message h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .example-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .example-btn {
+            padding: 8px 16px;
+            background: #e3f2fd;
+            border: none;
+            border-radius: 20px;
+            color: #1976d2;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .example-btn:hover {
+            background: #bbdefb;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Support Solutions RAG</h1>
+            <p>Stil spørgsmål om vores IT-services og få intelligente svar</p>
+        </div>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <h3>👋 Velkommen til Support Solutions RAG Chat!</h3>
+                <p>Jeg kan besvare spørgsmål om vores IT-services baseret på vores hjemmeside. Prøv at spørge om:</p>
+                <div class="example-questions">
+                    <button class="example-btn" onclick="askExample('Hvad er cloud services?')">Hvad er cloud services?</button>
+                    <button class="example-btn" onclick="askExample('Hvilken IT-support tilbyder I?')">Hvilken IT-support tilbyder I?</button>
+                    <button class="example-btn" onclick="askExample('Hvad koster jeres services?')">Hvad koster jeres services?</button>
+                    <button class="example-btn" onclick="askExample('Hvor er I lokaliseret?')">Hvor er I lokaliseret?</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Tænker...
+        </div>
+        
+        <div class="input-container">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="questionInput" 
+                    placeholder="Skriv dit spørgsmål her..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button id="askButton" onclick="askQuestion()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        function addMessage(content, isUser = false, sources = [], showContactButton = false, bookMeeting = false, meetingUrl = '') {
+            const chatContainer = document.getElementById('chatContainer');
+            const welcomeMsg = chatContainer.querySelector('.welcome-message');
+            if (welcomeMsg) welcomeMsg.remove();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            let html = `<div>${content}</div>`;
+            
+            // Add meeting booking button if this is a meeting-related question
+            if (!isUser && bookMeeting && meetingUrl) {
+                html += `
+                    <div style="margin-top: 15px;">
+                        <a href="${meetingUrl}" target="_blank" class="contact-button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none;">
+                            📅 Book Et Møde
+                        </a>
+                    </div>
+                `;
+            }
+            // Add contact button if this is a contact-related question
+            else if (!isUser && showContactButton) {
+                html += `
+                    <div style="margin-top: 15px;">
+                        <a href="https://support-solutions.dk/kontakt/" target="_blank" class="contact-button">
+                            Kontakt Os Nu
+                        </a>
+                    </div>
+                `;
+            }
+            
+            if (!isUser && sources.length > 0) {
+                const dropdownId = 'sources_' + Date.now() + Math.random().toString(36).substr(2, 9);
+                html += `
+                    <div class="sources">
+                        <div class="sources-dropdown" onclick="toggleSources('${dropdownId}')">
+                            <div class="sources-header">
+                                <span>📚 Se kilder (${sources.length})</span>
+                                <span class="dropdown-arrow" id="arrow_${dropdownId}">▼</span>
+                            </div>
+                            <div class="sources-content" id="${dropdownId}">
+                `;
+                sources.forEach(source => {
+                    // Create a cleaner link title
+                    let linkTitle = source.ref;
+                    if (source.url.includes('/kontakt/')) {
+                        linkTitle += ' Kontakt Side';
+                    } else if (source.url.includes('/om-os/')) {
+                        linkTitle += ' Om Os';
+                    } else if (source.url.includes('/blog/')) {
+                        linkTitle += ' Blog';
+                    } else if (source.url.includes('/cases/')) {
+                        linkTitle += ' Cases';
+                    } else if (source.url === 'https://support-solutions.dk/' || source.url === 'https://support-solutions.dk') {
+                        linkTitle += ' Forside';
+                    } else {
+                        linkTitle += ' Support Solutions';
+                    }
+                    
+                    html += `<a href="${source.url}" target="_blank" class="source-link">${linkTitle}</a>`;
+                });
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            messageDiv.innerHTML = html;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function toggleSources(dropdownId) {
+            const content = document.getElementById(dropdownId);
+            const arrow = document.getElementById('arrow_' + dropdownId);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                arrow.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                arrow.classList.add('expanded');
+            }
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('askButton').disabled = show;
+            document.getElementById('questionInput').disabled = show;
+        }
+        
+        async function askQuestion() {
+            const input = document.getElementById('questionInput');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            addMessage(question, true);
+            input.value = '';
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/ask`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                addMessage(
+                    data.answer, 
+                    false, 
+                    data.sources, 
+                    data.show_contact_button,
+                    data.book_meeting || false,
+                    data.meeting_url || ''
+                );
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('❌ Der opstod en fejl. Sørg for at serveren kører på http://localhost:8000', false);
+            }
+            
+            showLoading(false);
+        }
+        
+        function askExample(question) {
+            document.getElementById('questionInput').value = question;
+            askQuestion();
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                askQuestion();
+            }
+        }
+        
+        // Test connection på load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/docs`);
+                if (response.ok) {
+                    console.log('✅ API connection successful');
+                }
+            } catch (error) {
+                console.warn('⚠️ API not reachable:', error);
+            }
+        });
+    </script>
+</body>
+</html>

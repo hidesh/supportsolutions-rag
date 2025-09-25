@@ -1,0 +1,17 @@
+# venv / python cache
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# editor
+.vscode/
+.idea/
+
+# env
+.env
+
+# data / artifacts
+data/chunks.jsonl
+data/faiss.index
