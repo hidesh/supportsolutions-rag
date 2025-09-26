@@ -1150,6 +1150,12 @@
             document.getElementById('askButton').disabled = show;
             document.getElementById('questionInput').disabled = show;
             
+            // Update loading text to current language when showing
+            if (show) {
+                const t = translations[currentLanguage];
+                document.getElementById('loadingText').textContent = t.loadingText;
+            }
+            
             // Skjul forslag mens der tænkes
             const suggestions = document.getElementById('smartSuggestions');
             if (suggestions) {
