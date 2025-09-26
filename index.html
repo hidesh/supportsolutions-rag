@@ -982,9 +982,8 @@
         // Load saved language preference
         window.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('supportSolutions_language') || 'da';
-            if (savedLang !== 'da') {
-                switchLanguage(savedLang);
-            }
+            // Always call switchLanguage to ensure everything is properly set
+            switchLanguage(savedLang);
         });
         
         // AGGRESSIV AUTO-SCROLL - Garanteret scroll til bund!
