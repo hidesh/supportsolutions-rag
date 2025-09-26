@@ -18,11 +18,12 @@ app.add_middleware(
 
 class AskReq(BaseModel):
     question: str
+    language: str = "da"  # Default to Danish
 
 INDEX, CHUNKS = load_index_and_chunks()
 
 @app.post("/ask")
 def ask(req: AskReq):
     docs, _ = cosine_topk(INDEX, CHUNKS, req.question, k=6)
-    out = answer_question(req.question, docs)
+    out = answer_question(req.question, docs, req.language)
     return out

@@ -14,7 +14,8 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden; /* INGEN SCROLL PÅ BODY */
             padding: 10px;
             margin: 0;
         }
@@ -26,9 +27,10 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
-            min-height: calc(100vh - 20px);
+            height: calc(100vh - 20px); /* FAST HØJDE BASERET PÅ VIEWPORT */
             display: flex;
             flex-direction: column;
+            /* FJERNET FLEX - NU FAST STØRRELSE CHAT BOX */
         }
 
         .header {
@@ -36,7 +38,39 @@
             color: white;
             padding: 20px 15px;
             text-align: center;
-            flex-shrink: 0;
+            position: relative;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .lang-btn.active {
+            background: white;
+            color: #2c3e50;
+            border-color: white;
         }
 
         .header-logo {
@@ -60,7 +94,7 @@
         }
 
         .chat-container {
-            flex: 1;
+            flex: 1; /* BRUGER AL RESTERENDE PLADS */
             padding: 15px;
             overflow-y: auto;
             background: #f8f9fa;
@@ -269,7 +303,6 @@
             padding: 15px;
             background: white;
             border-top: 1px solid #eee;
-            flex-shrink: 0;
         }
 
         .input-group {
@@ -390,6 +423,7 @@
             }
             
             .chat-container {
+                height: 350px; /* FAST HØJDE for små skærme */
                 padding: 10px;
             }
             
@@ -489,6 +523,7 @@
             }
             
             .chat-container {
+                height: 450px; /* FAST HØJDE for tablets */
                 padding: 20px;
             }
             
@@ -529,6 +564,10 @@
             
             .container {
                 min-height: calc(100vh - 40px);
+            }
+            
+            .chat-container {
+                height: 500px; /* FAST HØJDE for desktop */
             }
             
             .header {
@@ -763,27 +802,31 @@
 <body>
     <div class="container">
         <div class="header">
+            <div class="language-selector">
+                <button class="lang-btn active" onclick="switchLanguage('da')" id="langDA">DA</button>
+                <button class="lang-btn" onclick="switchLanguage('en')" id="langEN">EN</button>
+            </div>
             <img src="https://support-solutions.dk/wp-content/uploads/Logo-hvid-web.png" alt="Support Solutions Logo" class="header-logo">
-            <h1>Support Solutions ChatBot 🤖</h1>
-            <p>Stil spørgsmål om vores IT-services og få intelligente svar</p>
+            <h1 id="headerTitle">Support Solutions ChatBot 🤖</h1>
+            <p id="headerSubtitle">Stil spørgsmål om vores IT-services og få intelligente svar</p>
         </div>
         
         <div class="chat-container" id="chatContainer">
             <div class="welcome-message">
-                <h3>👋 Velkommen til Support Solutions RAG Chat!</h3>
-                <p>Jeg kan besvare spørgsmål om vores IT-services baseret på vores hjemmeside. Prøv at spørge om:</p>
-                <div class="example-questions">
-                    <button class="example-btn" onclick="askExample('Hvad er cloud services?')">Hvad er cloud services?</button>
-                    <button class="example-btn" onclick="askExample('Hvilken IT-support tilbyder I?')">Hvilken IT-support tilbyder I?</button>
-                    <button class="example-btn" onclick="askExample('Hvad koster jeres services?')">Hvad koster jeres services?</button>
-                    <button class="example-btn" onclick="askExample('Hvor er I lokaliseret?')">Hvor er I lokaliseret?</button>
+                <h3 id="welcomeTitle">👋 Velkommen til Support Solutions RAG Chat!</h3>
+                <p id="welcomeText">Jeg kan besvare spørgsmål om vores IT-services baseret på vores hjemmeside. Prøv at spørge om:</p>
+                <div class="example-questions" id="exampleQuestions">
+                    <button class="example-btn" onclick="askExample('Hvad er cloud services?')" data-da="Hvad er cloud services?" data-en="What are cloud services?">Hvad er cloud services?</button>
+                    <button class="example-btn" onclick="askExample('Hvilken IT-support tilbyder I?')" data-da="Hvilken IT-support tilbyder I?" data-en="What IT support do you offer?">Hvilken IT-support tilbyder I?</button>
+                    <button class="example-btn" onclick="askExample('Hvad koster jeres services?')" data-da="Hvad koster jeres services?" data-en="What do your services cost?">Hvad koster jeres services?</button>
+                    <button class="example-btn" onclick="askExample('Hvor er I lokaliseret?')" data-da="Hvor er I lokaliseret?" data-en="Where are you located?">Hvor er I lokaliseret?</button>
                 </div>
             </div>
         </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            Tænker...
+            <span id="loadingText">Tænker...</span>
         </div>
         
         <div class="input-container">
@@ -802,21 +845,179 @@
     <script>
         const API_BASE = 'http://localhost:8000';
         
-        // Performance optimization: Debounce scrolling
-        let scrollTimeout;
-        const debouncedScroll = () => {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                const chatContainer = document.getElementById('chatContainer');
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 10);
+        // LANGUAGE SYSTEM 🌍
+        let currentLanguage = 'da';
+        
+        const translations = {
+            da: {
+                headerTitle: "Support Solutions ChatBot 🤖",
+                headerSubtitle: "Stil spørgsmål om vores IT-services og få intelligente svar",
+                welcomeTitle: "👋 Velkommen til Support Solutions RAG Chat!",
+                welcomeText: "Jeg kan besvare spørgsmål om vores IT-services baseret på vores hjemmeside. Prøv at spørge om:",
+                placeholder: "Skriv dit spørgsmål her...",
+                sendButton: "Send",
+                loadingText: "Tænker...",
+                sourcesHeader: "📚 Se kilder",
+                contactText: "📞 Ring til os",
+                meetingText: "📅 Book møde",
+                contactButtonText: "Kontakt Os Nu",
+                suggestionsHeader: "💡 Måske kan jeg hjælpe med et af disse spørgsmål?",
+                phoneNumber: "+45 26 33 11 38",
+                email: "info@support-solutions.dk",
+                emailButtonText: "Send os en Email",
+                callButtonText: "Ring Nu",
+                exampleQuestions: [
+                    "Hvad er cloud services?",
+                    "Hvilken IT-support tilbyder I?", 
+                    "Hvad koster jeres services?",
+                    "Hvor er I lokaliseret?"
+                ],
+                smartSuggestions: [
+                    "Hvilke services tilbyder I?",
+                    "Hvad handler jeres virksomhed om?",
+                    "Hvilke kunder har I hjulpet?",
+                    "Kan vi booke et møde?",
+                    "Hvad koster jeres services?",
+                    "Hvor hurtigt svarer I på support?"
+                ]
+            },
+            en: {
+                headerTitle: "Support Solutions ChatBot 🤖",
+                headerSubtitle: "Ask questions about our IT services and get intelligent answers",
+                welcomeTitle: "👋 Welcome to Support Solutions RAG Chat!",
+                welcomeText: "I can answer questions about our IT services based on our website. Try asking about:",
+                placeholder: "Type your question here...",
+                sendButton: "Send",
+                loadingText: "Thinking...",
+                sourcesHeader: "📚 View sources",
+                contactText: "📞 Call us",
+                meetingText: "📅 Book meeting",
+                contactButtonText: "Contact Us Now",
+                suggestionsHeader: "💡 Maybe I can help with one of these questions?",
+                phoneNumber: "+45 26 33 11 38",
+                email: "info@support-solutions.dk",
+                emailButtonText: "Send us an Email",
+                callButtonText: "Call Now",
+                exampleQuestions: [
+                    "What are cloud services?",
+                    "What IT support do you offer?",
+                    "What do your services cost?",
+                    "Where are you located?"
+                ],
+                smartSuggestions: [
+                    "What services do you offer?",
+                    "What is your business about?",
+                    "Which customers have you helped?",
+                    "Can we book a meeting?",
+                    "What do your services cost?",
+                    "How quickly do you respond to support?"
+                ]
+            }
         };
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update active language button
+            document.getElementById('langDA').classList.toggle('active', lang === 'da');
+            document.getElementById('langEN').classList.toggle('active', lang === 'en');
+            
+            // Clear chat and restart
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML = '';
+            
+            // Reset chat state
+            hasAskedFirstQuestion = false;
+            suggestionsShown = false;
+            clearTimeout(inactivityTimer);
+            
+            // Show welcome message in selected language
+            showWelcomeMessage();
+            
+            // Update all translated texts
+            const t = translations[lang];
+            document.getElementById('headerTitle').textContent = t.headerTitle;
+            document.getElementById('headerSubtitle').textContent = t.headerSubtitle;
+            document.getElementById('welcomeTitle').textContent = t.welcomeTitle;
+            document.getElementById('welcomeText').textContent = t.welcomeText;
+            document.getElementById('questionInput').placeholder = t.placeholder;
+            document.getElementById('askButton').textContent = t.sendButton;
+            document.getElementById('loadingText').textContent = t.loadingText;
+            
+            // Update example questions
+            const exampleBtns = document.querySelectorAll('.example-btn');
+            exampleBtns.forEach((btn, index) => {
+                if (t.exampleQuestions[index]) {
+                    btn.textContent = t.exampleQuestions[index];
+                    btn.setAttribute('onclick', `askExample('${t.exampleQuestions[index]}')`);
+                }
+            });
+            
+            // Clear question input
+            document.getElementById('questionInput').value = '';
+            
+            // Store language preference
+            localStorage.setItem('supportSolutions_language', lang);
+        }
+
+        function showWelcomeMessage() {
+            const t = translations[currentLanguage];
+            const chatContainer = document.getElementById('chatContainer');
+            
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'welcome-message';
+            welcomeDiv.innerHTML = `
+                <h3>${t.welcomeTitle}</h3>
+                <p>${t.welcomeText}</p>
+                <div class="example-questions">
+                    ${t.exampleQuestions.map(question => 
+                        `<button class="example-btn" onclick="askExample('${question}')">${question}</button>`
+                    ).join('')}
+                </div>
+            `;
+            
+            chatContainer.appendChild(welcomeDiv);
+        }
+
+        // Load saved language preference
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('supportSolutions_language') || 'da';
+            if (savedLang !== 'da') {
+                switchLanguage(savedLang);
+            }
+        });
+        
+        // AGGRESSIV AUTO-SCROLL - Garanteret scroll til bund!
+        function forceScrollToBottom() {
+            const chatContainer = document.getElementById('chatContainer');
+            
+            // Metode 1: Øjeblikkelig scroll
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Metode 2: Smooth scroll som backup
+            setTimeout(() => {
+                chatContainer.scrollTo({
+                    top: chatContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 10);
+            
+            // Metode 3: Force scroll efter DOM update
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 100);
+            
+            // Metode 4: Endelig sikkerhed
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 300);
+        }
         
         // Performance optimization: Virtual rendering for large message lists
         const MAX_VISIBLE_MESSAGES = 50;
         let messageCount = 0;
         
-        function addMessage(content, isUser = false, sources = [], showContactButton = false, bookMeeting = false, meetingUrl = '') {
+        function addMessage(content, isUser = false, sources = [], showContactButton = false, bookMeeting = false, meetingUrl = '', showPhone = false, phoneNumber = '', suggestedPage = '', suggestedPageText = '') {
             const chatContainer = document.getElementById('chatContainer');
             const welcomeMsg = chatContainer.querySelector('.welcome-message');
             if (welcomeMsg) {
@@ -834,6 +1035,7 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
             
+            const t = translations[currentLanguage];
             let html = `<div>${content}</div>`;
             
             // Add meeting booking button if this is a meeting-related question
@@ -841,7 +1043,19 @@
                 html += `
                     <div style="margin-top: 15px;">
                         <a href="${meetingUrl}" target="_blank" class="contact-button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none;">
-                            📅 Book Et Møde
+                            📅 ${t.meetingText}
+                        </a>
+                    </div>
+                `;
+            }
+            // Add phone button if this is a phone-related question  
+            else if (!isUser && showPhone && phoneNumber) {
+                // Use correct phone number from translations
+                const correctPhone = t.phoneNumber;
+                html += `
+                    <div style="margin-top: 15px;">
+                        <a href="tel:${correctPhone}" class="contact-button" style="background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); border: none;">
+                            ☎️ ${t.callButtonText}: ${correctPhone}
                         </a>
                     </div>
                 `;
@@ -851,7 +1065,18 @@
                 html += `
                     <div style="margin-top: 15px;">
                         <a href="https://support-solutions.dk/kontakt/" target="_blank" class="contact-button">
-                            Kontakt Os Nu
+                            ${t.contactButtonText}
+                        </a>
+                    </div>
+                `;
+            }
+            
+            // Add suggested page button for incomplete answers
+            if (!isUser && suggestedPage && suggestedPageText) {
+                html += `
+                    <div style="margin-top: 15px;">
+                        <a href="${suggestedPage}" target="_blank" class="contact-button" style="background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%); border: none;">
+                            📄 ${suggestedPageText}
                         </a>
                     </div>
                 `;
@@ -863,7 +1088,7 @@
                     <div class="sources">
                         <div class="sources-dropdown" onclick="toggleSources('${dropdownId}')">
                             <div class="sources-header">
-                                <span>📚 Se kilder (${sources.length})</span>
+                                <span>${t.sourcesHeader} (${sources.length})</span>
                                 <span class="dropdown-arrow" id="arrow_${dropdownId}">▼</span>
                             </div>
                             <div class="sources-content" id="${dropdownId}">
@@ -899,8 +1124,8 @@
             
             messageCount++;
             
-            // Use optimized scroll
-            debouncedScroll();
+            // FORCE SCROLL TIL BUND - INGEN UNDSKYLDNINGER!
+            forceScrollToBottom();
         }
         
         // Performance optimization: Use requestAnimationFrame for smooth animations
@@ -915,6 +1140,8 @@
                 } else {
                     content.classList.add('expanded');
                     arrow.classList.add('expanded');
+                    // FORCE SCROLL når kilder åbnes
+                    setTimeout(() => forceScrollToBottom(), 150);
                 }
             });
         }
@@ -923,6 +1150,12 @@
             document.getElementById('loading').style.display = show ? 'block' : 'none';
             document.getElementById('askButton').disabled = show;
             document.getElementById('questionInput').disabled = show;
+            
+            // Skjul forslag mens der tænkes
+            const suggestions = document.getElementById('smartSuggestions');
+            if (suggestions) {
+                suggestions.style.display = show ? 'none' : 'block';
+            }
         }
         
         // Performance optimization: Request caching
@@ -944,6 +1177,10 @@
             
             addMessage(question, true);
             input.value = '';
+            
+            // EXTRA SCROLL EFTER USER MESSAGE
+            setTimeout(() => forceScrollToBottom(), 50);
+            
             showLoading(true);
             
             try {
@@ -959,7 +1196,11 @@
                         data.sources, 
                         data.show_contact_button,
                         data.book_meeting || false,
-                        data.meeting_url || ''
+                        data.meeting_url || '',
+                        data.show_phone || false,
+                        data.phone_number || '',
+                        data.suggested_page || '',
+                        data.suggested_page_text || ''
                     );
                     showLoading(false);
                     return;
@@ -974,7 +1215,10 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ question: question }),
+                    body: JSON.stringify({ 
+                        question: question,
+                        language: currentLanguage 
+                    }),
                     signal: controller.signal
                 });
                 
@@ -998,22 +1242,35 @@
                     data.sources, 
                     data.show_contact_button,
                     data.book_meeting || false,
-                    data.meeting_url || ''
+                    data.meeting_url || '',
+                    data.show_phone || false,
+                    data.phone_number || '',
+                    data.suggested_page || '',
+                    data.suggested_page_text || ''
                 );
             } catch (error) {
                 console.error('Error:', error);
-                let errorMessage = '❌ Der opstod en fejl.';
+                let errorMessage = currentLanguage === 'en' ? 
+                    '❌ An error occurred.' : 
+                    '❌ Der opstod en fejl.';
                 
                 if (error.name === 'AbortError') {
-                    errorMessage = '⏱️ Timeout: Forespørgslen tog for lang tid. Prøv igen.';
+                    errorMessage = currentLanguage === 'en' ? 
+                        '⏱️ Timeout: Request took too long. Please try again.' :
+                        '⏱️ Timeout: Forespørgslen tog for lang tid. Prøv igen.';
                 } else if (error.message.includes('fetch')) {
-                    errorMessage = '🔌 Kan ikke forbinde til serveren. Sørg for at serveren kører på http://localhost:8000';
+                    errorMessage = currentLanguage === 'en' ? 
+                        '🔌 Cannot connect to server. Make sure the server is running on http://localhost:8000' :
+                        '🔌 Kan ikke forbinde til serveren. Sørg for at serveren kører på http://localhost:8000';
                 }
                 
                 addMessage(errorMessage, false);
             }
             
             showLoading(false);
+            
+            // FINAL SCROLL EFTER SVAR ER KLAR
+            setTimeout(() => forceScrollToBottom(), 100);
         }
         
         function askExample(question) {
@@ -1035,15 +1292,6 @@
         let suggestionsShown = false;
         let hasAskedFirstQuestion = false; // Track if user has asked at least one question
 
-        const smartSuggestions = [
-            "Hvilke services tilbyder I?",
-            "Hvad handler jeres virksomhed om?",
-            "Hvilke kunder har I hjulpet?",
-            "Kan vi booke et møde?",
-            "Hvad koster jeres services?",
-            "Hvor hurtigt svarer I på support?"
-        ];
-
         function resetInactivityTimer() {
             clearTimeout(inactivityTimer);
             suggestionsShown = false;
@@ -1055,7 +1303,7 @@
                     if (!suggestionsShown && !document.getElementById('questionInput').value.trim()) {
                         showSmartSuggestions();
                     }
-                }, 10000); // 10 sekunder
+                }, 15000); // 15 sekunder
             }
         }
 
@@ -1063,16 +1311,17 @@
             if (suggestionsShown) return;
             suggestionsShown = true;
 
+            const t = translations[currentLanguage];
             const chatContainer = document.getElementById('chatContainer');
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.id = 'smartSuggestions';
             suggestionsDiv.innerHTML = `
                 <div class="suggestions-container">
                     <div class="suggestions-header">
-                        <span>💡 Måske kan jeg hjælpe med et af disse spørgsmål?</span>
+                        <span>${t.suggestionsHeader}</span>
                     </div>
                     <div class="suggestions-grid">
-                        ${smartSuggestions.map(suggestion => 
+                        ${t.smartSuggestions.map(suggestion => 
                             `<button class="suggestion-btn" onclick="askExample('${suggestion}')">${suggestion}</button>`
                         ).join('')}
                     </div>
